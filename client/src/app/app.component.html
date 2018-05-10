@@ -1,0 +1,9 @@
+<input type="checkbox" [(ngModel)]="show1">
+<app-chat *ngIf="show1" subscribeUrl="/topic/greetings" sendUrl="/app/hello">
+</app-chat>
+<input type="checkbox" [(ngModel)]="show2">
+<app-chat *ngIf="show2" subscribeUrl="/topic/greetings2" sendUrl="/app/hello2">
+</app-chat>
+<input type="checkbox" [(ngModel)]="show3">
+<app-chat *ngIf="show3" subscribeUrl="/topic/greetings" sendUrl="/app/hello">
+</app-chat>
