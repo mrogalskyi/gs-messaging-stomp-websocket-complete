@@ -74,7 +74,6 @@ export class ReconnectingSockJS {
         };
     }
 
-
     private onConnect(frame: Stomp.Frame) {
         for (const endPoint in this.subscriptions) {
             if (this.subscriptions.hasOwnProperty(endPoint)) {
@@ -97,7 +96,7 @@ export class ReconnectingSockJS {
             automaticConnect: true,
             maxReconnectAttempts: null,
             reconnectInterval: 1000,
-            maxReconnectInterval: 30000,
+            maxReconnectInterval: 10000,
             reconnectDecay: 1.5,
         };
         if (!this.options) {

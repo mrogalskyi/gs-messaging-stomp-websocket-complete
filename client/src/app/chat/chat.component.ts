@@ -22,6 +22,11 @@ export class ChatComponent implements OnInit, OnDestroy {
             .subscribe((greeting) => {
                 this.messages = [...this.messages, JSON.parse(greeting.body).content];
             });
+
+        this.realTimeConnectionService.Connected$.subscribe(s => console.log('Connection status change: ', s));
+
+        this.realTimeConnectionService.ConnectError.subscribe(e => console.log('ConnectError: ', e));
+        this.realTimeConnectionService.Connect.subscribe(e => console.log('Connect: ', e));
     }
     ngOnDestroy(): void {
         this.subscription.unsubscribe();
