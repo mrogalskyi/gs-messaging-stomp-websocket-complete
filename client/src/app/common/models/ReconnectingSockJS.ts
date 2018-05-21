@@ -3,6 +3,9 @@ import * as Stomp from 'stompjs';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/takeUntil';
+import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/filter';
+import 'rxjs/add/operator/do';
 import { StompSubscription } from './StompSubscription';
 import { StompUserSubscription } from './StompUserSubscription';
 
@@ -34,6 +37,13 @@ export class ReconnectingSockJS {
         if (this.options.automaticConnect === true) {
             this.connect(false);
         }
+        if (this.options.forceReconnectInterval) {
+            this.connect$
+                .debounceTime(this.options.forceReconnectInterval)
+                .filter(v => this.Connected)
+                .do(v => this.client.debug('Force reconnect'))
+                .subscribe(v => this.reconnect());
+        }
     }
     connect(reconnectAttempt: boolean) {
         const socket = new SockJS(this.url);
@@ -52,6 +62,10 @@ export class ReconnectingSockJS {
             this.client.disconnect(() => this.disconnect$.next());
             this.client = null;
         }
+    }
+    reconnect() {
+        this.disconnect();
+        this.connect(false);
     }
     send(destination: string, headers?: {}, body?: string) {
         if (this.client && this.client.connected) {
@@ -98,6 +112,7 @@ export class ReconnectingSockJS {
             reconnectInterval: 1000,
             maxReconnectInterval: 10000,
             reconnectDecay: 1.5,
+            forceReconnectInterval: 300000 // 5min
         };
         if (!this.options) {
             this.options = {};

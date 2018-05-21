@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
 import { RealTimeConnectionService } from '../common/services/RealTimeConnectionService';
 import { StompUserSubscription } from '../common/models/StompUserSubscription';
+import { Subject } from 'rxjs/Subject';
 
 @Component({
     selector: 'app-chat',
@@ -14,6 +15,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     messages = [];
     name: string;
     subscription: StompUserSubscription;
+    private ngUnsubscribe: Subject<void> = new Subject<void>();
     constructor(private realTimeConnectionService: RealTimeConnectionService) {
     }
     ngOnInit() {
@@ -23,12 +25,21 @@ export class ChatComponent implements OnInit, OnDestroy {
                 this.messages = [...this.messages, JSON.parse(greeting.body).content];
             });
 
-        this.realTimeConnectionService.Connected$.subscribe(s => console.log('Connection status change: ', s));
+        this.realTimeConnectionService.Connected$
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(s => console.log('Connection status change: ', s));
 
-        this.realTimeConnectionService.ConnectError.subscribe(e => console.log('ConnectError: ', e));
-        this.realTimeConnectionService.Connect.subscribe(e => console.log('Connect: ', e));
+        this.realTimeConnectionService.ConnectError
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(e => console.log('ConnectError: ', e));
+
+        this.realTimeConnectionService.Connect
+            .takeUntil(this.ngUnsubscribe)
+            .subscribe(e => console.log('Connect: ', e));
     }
     ngOnDestroy(): void {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
         this.subscription.unsubscribe();
     }
     send() {
